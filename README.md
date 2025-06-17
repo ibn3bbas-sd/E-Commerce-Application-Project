@@ -1,193 +1,200 @@
 # 🛒 E-Commerce Application Setup (LAMP Stack on CentOS)
 
-This guide provides step-by-step instructions to set up a PHP-based e-commerce application using **CentOS**, **Apache**, **MariaDB**, and **PHP** (LAMP stack). Ideal for hosting platforms like **OpenCart**, **Magento**, or **WooCommerce**.
+This guide provides step-by-step instructions to set up a PHP-based e-commerce application using **CentOS**, **Apache**, **MariaDB**, and **PHP** (LAMP stack) 
+
+**The LAMP stack** is a popular open-source software stack used for web development. It consists of four key components:
+
+- Linux: The operating system that serves as the foundation.
+- Apache: A widely used web server that handles HTTP requests.
+- MySQL: A relational database management system for storing and managing data.
+- PHP, Perl, or Python: The programming language used for dynamic content and backend logic.
+
+Together, these components create a powerful environment for hosting and developing web applications, especially dynamic websites and content management systems like WordPress
 
 ---
 
 ## 📦 Tech Stack
 
-- **OS**: CentOS 7/8
+- **OS**: CentOS
 - **Web Server**: Apache (httpd)
 - **Database**: MariaDB
-- **Server-Side Language**: PHP 7.4+
-- **Platform**: OpenCart (recommended)
+- **Server-Side Language**: PHP
 
 ---
 
-## 📁 Directory Structure
+## Deploy Pre-Requisites
 
-```bash
-/var/www/html/
-├── opencart/                 # E-Commerce Platform
-└── ecommerce-configs/
-    ├── apache/
-    │   └── opencart.conf     # Apache virtual host config
-    ├── mysql/
-    │   └── init.sql          # DB init script
-    └── backup/
-        ├── db-backup.sh
-        └── files-backup.sh
+1. Install FirewallD
+
 ```
-
----
-
-## 🚀 Installation Steps
-
-### 1. Update System
-
-```bash
-sudo yum update -y
-```
-### 2. Install Firewall
-
-```bash
-sudo yum install firewalld -y
-sudo systemctl enable firewalld
+sudo yum install -y firewalld
 sudo systemctl start firewalld
+sudo systemctl enable firewalld
 sudo systemctl status firewalld
 ```
 
-### 3. Install MariaDB
+## Deploy and Configure Database
 
-```bash
-sudo yum install mariadb-server -y
-sudo systemctl enable --now mariadb
-sudo service maridb start
+1. Install MariaDB
+
+```
+sudo yum install -y mariadb-server
+sudo vi /etc/my.cnf
+sudo systemctl start mariadb
+sudo systemctl enable mariadb
+```
+
+2. Configure firewall for Database
+
+```
 sudo firewall-cmd --permanent --zone=public --add-port=3306/tcp
 sudo firewall-cmd --reload
-sudo mysql_secure_installation
 ```
 
-### 4. Install Apache
+3. Configure Database
 
-```bash
-sudo yum install httpd -y
-sudo systemctl enable --now httpd
+```
+$ mysql
+MariaDB > CREATE DATABASE ecomdb;
+MariaDB > CREATE USER 'ecomuser'@'localhost' IDENTIFIED BY 'ecompassword';
+MariaDB > GRANT ALL PRIVILEGES ON *.* TO 'ecomuser'@'localhost';
+MariaDB > FLUSH PRIVILEGES;
 ```
 
-### 4. Install PHP
+> ON a multi-node setup remember to provide the IP address of the web server here: `'ecomuser'@'web-server-ip'`
 
-#### For CentOS 7
+4. Load Product Inventory Information to database
 
-```bash
-sudo yum install epel-release -y
-sudo yum install yum-utils -y
-sudo yum install http://rpms.remirepo.net/enterprise/remi-release-7.rpm -y
-sudo yum-config-manager --enable remi-php74
-sudo yum install php php-mysql php-gd php-xml php-mbstring php-curl php-zip -y
+Create the db-load-script.sql
+
+```
+cat > db-load-script.sql <<-EOF
+USE ecomdb;
+CREATE TABLE products (id mediumint(8) unsigned NOT NULL auto_increment,Name varchar(255) default NULL,Price varchar(255) default NULL, ImageUrl varchar(255) default NULL,PRIMARY KEY (id)) AUTO_INCREMENT=1;
+
+INSERT INTO products (Name,Price,ImageUrl) VALUES ("Laptop","100","c-1.png"),("Drone","200","c-2.png"),("VR","300","c-3.png"),("Tablet","50","c-5.png"),("Watch","90","c-6.png"),("Phone Covers","20","c-7.png"),("Phone","80","c-8.png"),("Laptop","150","c-4.png");
+
+EOF
 ```
 
-#### For CentOS 8
+Run sql script
 
-```bash
-sudo dnf module reset php
-sudo dnf module enable php:7.4
-sudo dnf install php php-mysqlnd php-gd php-xml php-mbstring php-curl php-zip -y
 ```
 
----
-
-## 🌐 Web Server Setup
-
-### Apache Configuration
-
-Create a virtual host:
-
-```bash
-sudo nano /etc/httpd/conf.d/opencart.conf
+sudo mysql < db-load-script.sql
 ```
 
-```apache
-<VirtualHost *:80>
-    ServerName yourdomain.com
-    DocumentRoot /var/www/html/opencart
 
-    <Directory /var/www/html/opencart>
-        AllowOverride All
-        Require all granted
-    </Directory>
+## Deploy and Configure Web
 
-    ErrorLog /var/log/httpd/opencart_error.log
-    CustomLog /var/log/httpd/opencart_access.log combined
-</VirtualHost>
+1. Install required packages
+
+```
+sudo yum install -y httpd php php-mysqlnd
+sudo firewall-cmd --permanent --zone=public --add-port=80/tcp
+sudo firewall-cmd --reload
 ```
 
-```bash
-sudo systemctl restart httpd
+2. Configure httpd
+
+Change `DirectoryIndex index.html` to `DirectoryIndex index.php` to make the php page the default page
+
+```
+sudo sed -i 's/index.html/index.php/g' /etc/httpd/conf/httpd.conf
 ```
 
----
+3. Start httpd
 
-## 🛠️ Deploy OpenCart
-
-```bash
-cd /tmp
-wget https://github.com/opencart/opencart/releases/download/4.0.2.3/opencart-4.0.2.3.zip
-sudo yum install unzip -y
-unzip opencart-4.0.2.3.zip
-sudo mv upload/ /var/www/html/opencart
-sudo chown -R apache:apache /var/www/html/opencart
+```
+sudo systemctl start httpd
+sudo systemctl enable httpd
 ```
 
----
+4. Download code
 
-## 🗄️ Database Setup
-
-```bash
-mysql -u root -p
+```
+sudo yum install -y git
+sudo git clone https://github.com/kodekloudhub/learning-app-ecommerce.git /var/www/html/
 ```
 
-```sql
-CREATE DATABASE opencart;
-CREATE USER 'oc_user'@'localhost' IDENTIFIED BY 'StrongPassword!';
-GRANT ALL PRIVILEGES ON opencart.* TO 'oc_user'@'localhost';
-FLUSH PRIVILEGES;
-EXIT;
+<!-- 5. Update index.php
+
+Update [index.php](https://github.com/kodekloudhub/learning-app-ecommerce/blob/13b6e9ddc867eff30368c7e4f013164a85e2dccb/index.php#L107) file to connect to the right database server. In this case `localhost` since the database is on the same server.
+
+```
+sudo sed -i 's/172.20.1.101/localhost/g' /var/www/html/index.php
+
+              <?php
+                        $link = mysqli_connect('172.20.1.101', 'ecomuser', 'ecompassword', 'ecomdb');
+                        if ($link) {
+                        $res = mysqli_query($link, "select * from products;");
+                        while ($row = mysqli_fetch_assoc($res)) { ?>
 ```
 
-```bash
-mysql -u oc_user -p opencart < /path/to/opencart.sql
+> ON a multi-node setup remember to provide the IP address of the database server here.
 ```
----
-
-## 🔒 Optional: Enable SSL (Let's Encrypt)
-
-```bash
-sudo yum install epel-release -y
-sudo yum install certbot python2-certbot-apache -y
-sudo certbot --apache
+sudo sed -i 's/172.20.1.101/localhost/g' /var/www/html/index.php
 ```
+-->
 
----
+5. Create and Configure the `.env` File
 
-## 🔍 Test Setup
+   Create an `.env` file in the root of your project folder.
 
-* Apache: `http://your-server-ip/`
-* PHP: `http://your-server-ip/info.php`
-* OpenCart: `http://your-server-ip/opencart/install`
+   ```sh
+   cat > /var/www/html/.env <<-EOF
+   DB_HOST=localhost
+   DB_USER=ecomuser
+   DB_PASSWORD=ecompassword
+   DB_NAME=ecomdb
+   EOF
 
----
+6. Update `index.php`
 
-## 📌 Maintenance Tips
+   Update the `index.php` file to load the environment variables from the `.env` file and use them to connect to the database.
 
-* Backup files and database regularly
-* Use `fail2ban`, `firewalld`, and secure SSH
-* Update packages monthly
+   ```php
+   <?php
+   // Function to load environment variables from a .env file
+   function loadEnv($path)
+   {
+       if (!file_exists($path)) {
+           return false;
+       }
 
----
+       $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+       foreach ($lines as $line) {
+           if (strpos(trim($line), '#') === 0) {
+               continue;
+           }
 
-## 🧪 Optional Tools
+           list($name, $value) = explode('=', $line, 2);
+           $name = trim($name);
+           $value = trim($value);
+           putenv(sprintf('%s=%s', $name, $value));
+       }
+       return true;
+   }
 
-* phpMyAdmin
+   // Load environment variables from .env file
+   loadEnv(__DIR__ . '/.env');
 
-```bash
-sudo yum install phpmyadmin -y
+   // Retrieve the database connection details from environment variables
+   $dbHost = getenv('DB_HOST');
+   $dbUser = getenv('DB_USER');
+   $dbPassword = getenv('DB_PASSWORD');
+   $dbName = getenv('DB_NAME');
+
+   ?>
+
+   ON a multi-node setup, remember to provide the IP address of the database server in the .env file.
+
+
+7. Test
+
 ```
-
-* Adminer (single PHP file DB admin)
-* Git integration for version control
-
----
+curl http://localhost
+```
 
 ## 📜 License
 
@@ -199,16 +206,8 @@ This project uses the [MIT License](./LICENSE).
 
 For issues, open a GitHub issue or reach out via email.
 
-```
-
----
-
 Let me know if you'd like:
 - A script to auto-install all components
 - `LICENSE`
 - `.gitignore`
 - GitHub Actions workflow for automated deployment
-```
-# E-Commerce-Application
-# E-Commerce-Application
-# E-Commerce-Application-Project
