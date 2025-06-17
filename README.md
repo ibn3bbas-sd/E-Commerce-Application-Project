@@ -4,10 +4,10 @@ This guide provides step-by-step instructions to set up a PHP-based e-commerce a
 
 **The LAMP stack** is a popular open-source software stack used for web development. It consists of four key components:
 
-- Linux: The operating system that serves as the foundation.
-- Apache: A widely used web server that handles HTTP requests.
-- MySQL: A relational database management system for storing and managing data.
-- PHP, Perl, or Python: The programming language used for dynamic content and backend logic.
+- 🐧 Linux: The operating system that serves as the foundation.
+- 🌐 Apache: A widely used web server that handles HTTP requests.
+- 🐬 MySQL: A relational database management system for storing and managing data.
+- 🐘 PHP, Perl, or Python: The programming language used for dynamic content and backend logic.
 
 Together, these components create a powerful environment for hosting and developing web applications, especially dynamic websites and content management systems like WordPress
 
@@ -22,7 +22,7 @@ Together, these components create a powerful environment for hosting and develop
 
 ---
 
-## Deploy Pre-Requisites
+## ⚙️ Deploy Pre-Requisites
 
 1. Install FirewallD
 
@@ -33,7 +33,7 @@ sudo systemctl enable firewalld
 sudo systemctl status firewalld
 ```
 
-## Deploy and Configure Database
+## 🛠️ Deploy and Configure Database
 
 1. Install MariaDB
 
@@ -61,7 +61,7 @@ MariaDB > GRANT ALL PRIVILEGES ON *.* TO 'ecomuser'@'localhost';
 MariaDB > FLUSH PRIVILEGES;
 ```
 
-> ON a multi-node setup remember to provide the IP address of the web server here: `'ecomuser'@'web-server-ip'`
+> 💡 ON a multi-node setup remember to provide the IP address of the web server here: `'ecomuser'@'web-server-ip'`
 
 4. Load Product Inventory Information to database
 
@@ -85,7 +85,7 @@ sudo mysql < db-load-script.sql
 ```
 
 
-## Deploy and Configure Web
+## 🌍 Deploy and Configure Web
 
 1. Install required packages
 
@@ -188,7 +188,7 @@ sudo sed -i 's/172.20.1.101/localhost/g' /var/www/html/index.php
 
    ?>
 
-   ON a multi-node setup, remember to provide the IP address of the database server in the .env file.
+   💡 ON a multi-node setup, remember to provide the IP address of the database server in the .env file.
 
 
 7. Test
@@ -208,7 +208,7 @@ This project uses the [MIT License](./LICENSE).
 For issues, open a GitHub issue or reach out via email.
 
 Let me know if you'd like:
-- A script to auto-install all components
-- `LICENSE`
-- `.gitignore`
-- GitHub Actions workflow for automated deployment
+⚡ A script to auto-install all components
+📄 LICENSE file
+🛑 .gitignore file
+🤖 GitHub Actions workflow for automated deployment
