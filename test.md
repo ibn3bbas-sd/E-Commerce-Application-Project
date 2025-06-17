@@ -1,26 +1,8 @@
-# 🛒 E-Commerce Application Setup (LAMP Stack on CentOS)
+# Introduction
 
-This guide provides step-by-step instructions to set up a PHP-based e-commerce application using **CentOS**, **Apache**, **MariaDB**, and **PHP** (LAMP stack) 
+This is a sample e-commerce application built for learning purposes.
 
-**The LAMP stack** is a popular open-source software stack used for web development. It consists of four key components:
-
-- Linux: The operating system that serves as the foundation.
-- Apache: A widely used web server that handles HTTP requests.
-- MySQL: A relational database management system for storing and managing data.
-- PHP, Perl, or Python: The programming language used for dynamic content and backend logic.
-
-Together, these components create a powerful environment for hosting and developing web applications, especially dynamic websites and content management systems like WordPress
-
----
-
-## 📦 Tech Stack
-
-- **OS**: CentOS
-- **Web Server**: Apache (httpd)
-- **Database**: MariaDB
-- **Server-Side Language**: PHP
-
----
+Here's how to deploy it on CentOS systems:
 
 ## Deploy Pre-Requisites
 
@@ -114,11 +96,10 @@ sudo systemctl enable httpd
 
 ```
 sudo yum install -y git
-sudo git clone https://github.com/ibn3bbas-sd/E-Commerce-Application-Project.git /var/www/html/
+sudo git clone https://github.com/kodekloudhub/learning-app-ecommerce.git /var/www/html/
 ```
 
-5. Update index.php
-<!--
+<!-- 5. Update index.php
 
 Update [index.php](https://github.com/kodekloudhub/learning-app-ecommerce/blob/13b6e9ddc867eff30368c7e4f013164a85e2dccb/index.php#L107) file to connect to the right database server. In this case `localhost` since the database is on the same server.
 
@@ -196,19 +177,3 @@ sudo sed -i 's/172.20.1.101/localhost/g' /var/www/html/index.php
 ```
 curl http://localhost
 ```
-
-## 📜 License
-
-This project uses the [MIT License](./LICENSE).
-
----
-
-## 🙋 Support
-
-For issues, open a GitHub issue or reach out via email.
-
-Let me know if you'd like:
-- A script to auto-install all components
-- `LICENSE`
-- `.gitignore`
-- GitHub Actions workflow for automated deployment
