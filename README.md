@@ -208,7 +208,7 @@ This project uses the [MIT License](./LICENSE).
 For issues, open a GitHub issue or reach out via email.
 
 Let me know if you'd like:
-⚡ A script to auto-install all components
-📄 LICENSE file
-🛑 .gitignore file
-🤖 GitHub Actions workflow for automated deployment
+- ⚡ A script to auto-install all components
+- 📄 LICENSE file
+- 🛑 .gitignore file
+- 🤖 GitHub Actions workflow for automated deployment
